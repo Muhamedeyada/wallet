@@ -1,5 +1,4 @@
-// constants/colors.js
-const coffeeTheme = {
+const coffeeLight = {
   primary: "#8B593E",
   background: "#FFF8F3",
   text: "#4A3428",
@@ -9,6 +8,19 @@ const coffeeTheme = {
   expense: "#E74C3C",
   income: "#2ECC71",
   card: "#FFFFFF",
+  shadow: "#000000",
+};
+
+const coffeeDark = {
+  primary: "#8B593E",
+  background: "#1C1008",
+  text: "#F0DEC8",
+  border: "#3D2515",
+  white: "#FFFFFF",
+  textLight: "#9A8478",
+  expense: "#FF6B5E",
+  income: "#4DE88A",
+  card: "#2A1810",
   shadow: "#000000",
 };
 
@@ -52,11 +64,13 @@ const oceanTheme = {
 };
 
 export const THEMES = {
-  coffee: coffeeTheme,
+  coffee: coffeeLight,
   forest: forestTheme,
   purple: purpleTheme,
   ocean: oceanTheme,
 };
 
-// 👇 change this to switch theme
-export const COLORS = THEMES.coffee;
+export const LIGHT_COLORS = coffeeLight;
+export const DARK_COLORS = coffeeDark;
+
+export const COLORS = LIGHT_COLORS;

@@ -1,13 +1,11 @@
-// react custom hook file
-
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 import { API_URL } from "../constants/api";
-
-// const API_URL = "https://wallet-api-cxqp.onrender.com/api";
-// const API_URL = "http://localhost:5001/api";
+import { useSettings } from "../contexts/SettingsContext";
 
 export const useTransactions = (userId) => {
+  const { t } = useSettings();
+
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState({
     balance: 0,
@@ -16,7 +14,6 @@ export const useTransactions = (userId) => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // useCallback is used for performance reasons, it will memoize the function
   const fetchTransactions = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/transactions/${userId}`);
@@ -42,7 +39,6 @@ export const useTransactions = (userId) => {
 
     setIsLoading(true);
     try {
-      // can be run in parallel
       await Promise.all([fetchTransactions(), fetchSummary()]);
     } catch (error) {
       console.error("Error loading data:", error);
@@ -54,14 +50,13 @@ export const useTransactions = (userId) => {
   const deleteTransaction = async (id) => {
     try {
       const response = await fetch(`${API_URL}/transactions/${id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Failed to delete transaction");
+      if (!response.ok) throw new Error(t.failedCreate);
 
-      // Refresh data after deletion
       loadData();
-      Alert.alert("Success", "Transaction deleted successfully");
+      Alert.alert(t.success, t.transactionDeleted);
     } catch (error) {
       console.error("Error deleting transaction:", error);
-      Alert.alert("Error", error.message);
+      Alert.alert(t.error, error.message);
     }
   };
 

@@ -4,30 +4,32 @@ import {
   Alert,
   TouchableOpacity,
   TextInput,
-  ActivityIndicatorBase,
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useUser } from "@clerk/clerk-expo";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { API_URL } from "../../constants/api";
-import { styles } from "../../assets/styles/create.styles";
-import { COLORS } from "../../constants/colors";
+import { createStyles } from "../../assets/styles/create.styles";
 import { Ionicons } from "@expo/vector-icons";
+import { useSettings } from "../../contexts/SettingsContext";
 
+// IDs match what's stored in the database (always English)
 const CATEGORIES = [
-  { id: "food", name: "Food & Drinks", icon: "fast-food" },
-  { id: "shopping", name: "Shopping", icon: "cart" },
-  { id: "transportation", name: "Transportation", icon: "car" },
-  { id: "entertainment", name: "Entertainment", icon: "film" },
-  { id: "bills", name: "Bills", icon: "receipt" },
-  { id: "income", name: "Income", icon: "cash" },
-  { id: "other", name: "Other", icon: "ellipsis-horizontal" },
+  { id: "Food & Drinks", icon: "fast-food" },
+  { id: "Shopping", icon: "cart" },
+  { id: "Transportation", icon: "car" },
+  { id: "Entertainment", icon: "film" },
+  { id: "Bills", icon: "receipt" },
+  { id: "Income", icon: "cash" },
+  { id: "Other", icon: "ellipsis-horizontal" },
 ];
 
 const CreateScreen = () => {
   const router = useRouter();
   const { user } = useUser();
+  const { colors, t, isRTL } = useSettings();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
@@ -35,28 +37,26 @@ const CreateScreen = () => {
   const [isExpense, setIsExpense] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
+  const textStyle = isRTL ? { textAlign: "right" } : {};
+  const rowStyle = isRTL ? { flexDirection: "row-reverse" } : {};
+
   const handleCreate = async () => {
-    // validations
-    if (!title.trim()) return Alert.alert("Error", "Please enter a transaction title");
+    if (!title.trim()) return Alert.alert(t.error, t.enterTitle);
     if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
-      Alert.alert("Error", "Please enter a valid amount");
+      Alert.alert(t.error, t.enterAmount);
       return;
     }
-
-    if (!selectedCategory) return Alert.alert("Error", "Please select a category");
+    if (!selectedCategory) return Alert.alert(t.error, t.selectCategory);
 
     setIsLoading(true);
     try {
-      // Format the amount (negative for expenses, positive for income)
       const formattedAmount = isExpense
         ? -Math.abs(parseFloat(amount))
         : Math.abs(parseFloat(amount));
 
       const response = await fetch(`${API_URL}/transactions`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: user.id,
           title,
@@ -67,14 +67,13 @@ const CreateScreen = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log(errorData);
-        throw new Error(errorData.error || "Failed to create transaction");
+        throw new Error(errorData.error || t.failedCreate);
       }
 
-      Alert.alert("Success", "Transaction created successfully");
+      Alert.alert(t.success, t.transactionCreated);
       router.back();
     } catch (error) {
-      Alert.alert("Error", error.message || "Failed to create transaction");
+      Alert.alert(t.error, error.message || t.failedCreate);
       console.error("Error creating transaction:", error);
     } finally {
       setIsLoading(false);
@@ -84,23 +83,27 @@ const CreateScreen = () => {
   return (
     <View style={styles.container}>
       {/* HEADER */}
-      <View style={styles.header}>
+      <View style={[styles.header, rowStyle]}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          <Ionicons
+            name={isRTL ? "arrow-forward" : "arrow-back"}
+            size={24}
+            color={colors.text}
+          />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>New Transaction</Text>
+        <Text style={styles.headerTitle}>{t.newTransaction}</Text>
         <TouchableOpacity
           style={[styles.saveButtonContainer, isLoading && styles.saveButtonDisabled]}
           onPress={handleCreate}
           disabled={isLoading}
         >
-          <Text style={styles.saveButton}>{isLoading ? "Saving..." : "Save"}</Text>
-          {!isLoading && <Ionicons name="checkmark" size={18} color={COLORS.primary} />}
+          <Text style={styles.saveButton}>{isLoading ? t.saving : t.save}</Text>
+          {!isLoading && <Ionicons name="checkmark" size={18} color={colors.primary} />}
         </TouchableOpacity>
       </View>
 
       <View style={styles.card}>
-        <View style={styles.typeSelector}>
+        <View style={[styles.typeSelector, rowStyle]}>
           {/* EXPENSE SELECTOR */}
           <TouchableOpacity
             style={[styles.typeButton, isExpense && styles.typeButtonActive]}
@@ -109,11 +112,11 @@ const CreateScreen = () => {
             <Ionicons
               name="arrow-down-circle"
               size={22}
-              color={isExpense ? COLORS.white : COLORS.expense}
+              color={isExpense ? colors.white : colors.expense}
               style={styles.typeIcon}
             />
             <Text style={[styles.typeButtonText, isExpense && styles.typeButtonTextActive]}>
-              Expense
+              {t.expense}
             </Text>
           </TouchableOpacity>
 
@@ -125,22 +128,22 @@ const CreateScreen = () => {
             <Ionicons
               name="arrow-up-circle"
               size={22}
-              color={!isExpense ? COLORS.white : COLORS.income}
+              color={!isExpense ? colors.white : colors.income}
               style={styles.typeIcon}
             />
             <Text style={[styles.typeButtonText, !isExpense && styles.typeButtonTextActive]}>
-              Income
+              {t.income}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* AMOUNT CONTAINER */}
-        <View style={styles.amountContainer}>
+        <View style={[styles.amountContainer, rowStyle]}>
           <Text style={styles.currencySymbol}>$</Text>
           <TextInput
             style={styles.amountInput}
             placeholder="0.00"
-            placeholderTextColor={COLORS.textLight}
+            placeholderTextColor={colors.textLight}
             value={amount}
             onChangeText={setAmount}
             keyboardType="numeric"
@@ -148,25 +151,25 @@ const CreateScreen = () => {
         </View>
 
         {/* INPUT CONTAINER */}
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, rowStyle]}>
           <Ionicons
             name="create-outline"
             size={22}
-            color={COLORS.textLight}
+            color={colors.textLight}
             style={styles.inputIcon}
           />
           <TextInput
-            style={styles.input}
-            placeholder="Transaction Title"
-            placeholderTextColor={COLORS.textLight}
+            style={[styles.input, textStyle]}
+            placeholder={t.transactionTitle}
+            placeholderTextColor={colors.textLight}
             value={title}
             onChangeText={setTitle}
+            textAlign={isRTL ? "right" : "left"}
           />
         </View>
 
-        {/* TITLE */}
-        <Text style={styles.sectionTitle}>
-          <Ionicons name="pricetag-outline" size={16} color={COLORS.text} /> Category
+        <Text style={[styles.sectionTitle, textStyle]}>
+          {t.category}
         </Text>
 
         <View style={styles.categoryGrid}>
@@ -175,23 +178,23 @@ const CreateScreen = () => {
               key={category.id}
               style={[
                 styles.categoryButton,
-                selectedCategory === category.name && styles.categoryButtonActive,
+                selectedCategory === category.id && styles.categoryButtonActive,
               ]}
-              onPress={() => setSelectedCategory(category.name)}
+              onPress={() => setSelectedCategory(category.id)}
             >
               <Ionicons
                 name={category.icon}
                 size={20}
-                color={selectedCategory === category.name ? COLORS.white : COLORS.text}
+                color={selectedCategory === category.id ? colors.white : colors.text}
                 style={styles.categoryIcon}
               />
               <Text
                 style={[
                   styles.categoryButtonText,
-                  selectedCategory === category.name && styles.categoryButtonTextActive,
+                  selectedCategory === category.id && styles.categoryButtonTextActive,
                 ]}
               >
-                {category.name}
+                {t[category.id] || category.id}
               </Text>
             </TouchableOpacity>
           ))}
@@ -200,7 +203,7 @@ const CreateScreen = () => {
 
       {isLoading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
     </View>

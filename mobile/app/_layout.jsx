@@ -3,14 +3,26 @@ import SafeScreen from "@/components/SafeScreen";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { StatusBar } from "expo-status-bar";
+import { SettingsProvider, useSettings } from "@/contexts/SettingsContext";
 
-export default function RootLayout() {
+function AppContent() {
+  const { isDark } = useSettings();
   return (
-    <ClerkProvider tokenCache={tokenCache}>
+    <>
       <SafeScreen>
         <Slot />
       </SafeScreen>
-      <StatusBar style="dark" />
-    </ClerkProvider>
+      <StatusBar style={isDark ? "light" : "dark"} />
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SettingsProvider>
+      <ClerkProvider tokenCache={tokenCache}>
+        <AppContent />
+      </ClerkProvider>
+    </SettingsProvider>
   );
 }
