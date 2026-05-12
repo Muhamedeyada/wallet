@@ -4,7 +4,7 @@
   Full-stack mobile app to track income & expenses, built with React Native, Express, PostgreSQL, and Clerk auth.
 </p>
 
-![Demo App](/mobile/assets/images/screenshot-for-readme.png)
+![Demo App](/mobile/assets/images/wallet-mockup.jpg)
 
 ---
 
@@ -22,15 +22,15 @@
 
 ## Stack
 
-| Layer | Technology |
-|---|---|
-| Mobile | React Native 0.79 + Expo 53 |
-| Navigation | Expo Router (file-based) |
-| Auth | Clerk for Expo |
-| Backend | Express.js 4 |
-| Database | Neon (serverless PostgreSQL) |
-| Rate Limiting | Upstash Redis |
-| Hosting | Render (backend) |
+| Layer         | Technology                   |
+| ------------- | ---------------------------- |
+| Mobile        | React Native 0.79 + Expo 53  |
+| Navigation    | Expo Router (file-based)     |
+| Auth          | Clerk for Expo               |
+| Backend       | Express.js 4                 |
+| Database      | Neon (serverless PostgreSQL) |
+| Rate Limiting | Upstash Redis                |
+| Hosting       | Render (backend)             |
 
 ---
 
@@ -73,13 +73,13 @@ wallet/
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/health` | Health check |
-| `GET` | `/api/transactions/:userId` | All transactions for a user |
-| `POST` | `/api/transactions` | Create a transaction |
-| `DELETE` | `/api/transactions/:id` | Delete a transaction |
-| `GET` | `/api/transactions/summary/:userId` | Balance, income, expenses totals |
+| Method   | Endpoint                            | Description                      |
+| -------- | ----------------------------------- | -------------------------------- |
+| `GET`    | `/api/health`                       | Health check                     |
+| `GET`    | `/api/transactions/:userId`         | All transactions for a user      |
+| `POST`   | `/api/transactions`                 | Create a transaction             |
+| `DELETE` | `/api/transactions/:id`             | Delete a transaction             |
+| `GET`    | `/api/transactions/summary/:userId` | Balance, income, expenses totals |
 
 ---
 
